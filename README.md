@@ -83,6 +83,7 @@ static int xmp_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
 }
 ```
 Pada fungsi ini terdapat penentuan direktori yang akan dienkripsi yaitu jika diawali dengan "encv1_"
+
 **Kendala:** Masih error dan belum selesai.
 
 ![](no1/no1.png)
