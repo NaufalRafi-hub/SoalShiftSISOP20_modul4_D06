@@ -8,6 +8,85 @@
 
 
 ### 1. Soal 1
+Yang diminta oleh soal ialah mengenkripsi direktori yang dibuat dengan awalan "encv1_" menggunakan caesar cipher dengan key yang sudah ditentukan.
+```sh
+char key[] = "9(ku@AW1[Lmvgax6q`5Y2Ry?+sF!^HKQiBXCUSe&0M.b%rI'7d)o4~VfZ*{#:}ETt$3J-zpc]lnh8,GwP_ND|jO";
+const int temp = 10;
+
+char *getExt (char *str) {
+    char *ext = strrchr (str, '.');
+    if (ext == NULL)
+        ext = "";
+    return ext;
+}
+
+void encrypt1(char *enc){
+	if(!strcmp(enc,".") || !strcmp(enc,"..")) return;
+	int len=strlen(getExt(enc));
+	for( int i = 0; i < strlen(enc)-len ;i++) {
+		if(enc[i] != '/'){
+			for (int j = 0; j < strlen(key); j++) {
+	     		if(enc[i] == key[j]) {
+	        		enc[i] = key[(j+temp) % strlen(key)];
+	        		break;
+        	}
+			}
+		}
+	}
+}
+```
+fungsi getExt digunakan untuk mencari titik paling terakhir dari path directory menggunakan strrchr. Pada fungsi encrypt1 pertama dilakukan iterasi dengan kondisi jumlah karakter yang akan dienkripsi dikurangi dengan `len` yaitu jumlah karakter pada ekstensi file sehingga ekstensi file tidak ikut terenkripsi. Untuk enkripsi pertama mencari karakter yang akan dienkripsi pada key, lalu karakter yang dienkripsi diganti dengan karakter pada key yang posisinya sudah dirubah yaitu dengan menjumlahkan 10 (key yang dipakai) dan dimodulo banyaknya karakter key.
+
+```sh
+static int xmp_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
+		       off_t offset, struct fuse_file_info *fi)
+{
+	char fpath[1000];
+	char *encv1 = strstr(path,"encv1_");
+	sprintf(fpath, "%s%s",dirpath,path);
+	if(strcmp(path,"/") == 0)
+	{
+		path=dirpath;
+		sprintf(fpath,"%s",path);
+	}else{  		
+		if(encv1 != NULL ){
+     		sprintf(fpath,"%s/%s",dirpath,encv1);
+     }
+  	}
+	int res = 0;
+
+	DIR *dp;
+	struct dirent *de;
+
+	(void) offset;
+	(void) fi;
+
+	dp = opendir(fpath);
+	if (dp == NULL)
+		return -errno;
+
+	while ((de = readdir(dp)) != NULL) {
+		struct stat st;
+		memset(&st, 0, sizeof(st));
+		st.st_ino = de->d_ino;
+  		st.st_mode = de->d_type << 12;
+
+		if(encv1 != NULL){
+			encrypt1(de->d_name);
+		}
+    	res = (filler(buf, de->d_name, &st, 0));
+		if(res!=0) 
+			break;
+	}
+	closedir(dp);
+	return 0;
+}
+```
+Pada fungsi ini terdapat penentuan direktori yang akan dienkripsi yaitu jika diawali dengan "encv1_"
+**Kendala:** Masih error dan belum selesai.
+
+![](no1/no1.png)
+
 ### 2. Soal 2
 ### 3. Soal 3
 ### 4. Soal 4
